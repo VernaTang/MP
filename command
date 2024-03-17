@@ -1,0 +1,1 @@
+python generate_k_shot_data.py --task="MELD_MIX" --data_dir="./data/original"
