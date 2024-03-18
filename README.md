@@ -18,21 +18,60 @@
 ## File Description
 ```
 project
-│   README.md
-│   file001.txt    
+│   README.md 
 │
-└───folder1
-│   │   file011.txt
-│   │   file012.txt
+└───baseline
+│   │   baseline_concat.py
+│   │   baseline_concat.sh(run file for baseline)
 │   │
-│   └───subfolder1
-│       │   file111.txt
-│       │   file112.txt
-│       │   ...
+│   └───model_baseline_ckpt(checkpoints file for baseline testing)
 │   
-└───folder2
-    │   file021.txt
-    │   file022.txt
+└───dataset-process
+│   └───MELD(features)
+│   │   |   dev/train/test_a_3dim.csv(3 dimensional features from audio)
+│   │   |   dev/train/test_meld_au_text_i.csv(semantic descriptions for visual modality)
+│   │   |   dev/train/test_trans.csv(utterances)
+│   │   |   dev/train/test_mix_sentence.csv(combination for semantic description of all modalities(text+audio+visual))
+│   │   |   dev/train/test_mix_at/vt_sentence.csv(combination for semantic description of two modalities(at:text+audio vt:visual+text))
+│   │   |   outputIS09_dev/train/test.csv(extracted features from audio by OpenSmile(IS09))
+│   │   |   meld_label_3way.npz(generated label file)
+│   │
+│   └───features/MELD(features for baseline)
+│   │   |   openface_meld.tar.gz(extracted features by OpenFace)(big files!)
+│   │   |
+│   │   └───audio(audio features extracted by OpenSmile)
+│   │   |
+│   │   └───text(textual features extracted by Sentence-Transformer)
+│   │   |
+│   │   └───visual(visual features extracted by ImageNet)
+│   │
+└───dataset-release(original label files for MELD）
+│   │
+└───data(wav files for MELD dataset)
+│   └───audio_split(audio files for dataset)
+│   │
+└───MELD_result(testing result)
+│   
+└───feature_extract(feature extraction files)
+│   │   config.py
+│   │   extract_imagenet_embedding.py(visual feature extraction)
+│   │   extract_visual_features.sh(run file for extracting visual features)
+│   │   audio_process.py((audio feature extraction))
+│   |
+└───prompt(run files for prompting)
+│   │   meld_test.sh(run file for test)
+│   │   meld_val.sh(run file for training the validation)
+│   │   meld_test.py
+│   │   meld_val.py
+│   │   Temps.py(label mapping groups)
+│   │
+│   └───dataset
+│   │   └───dataloader.py
+│   │
+│   └───model_ckpt(checkpoint files)
+│   │
+│   └───models(pretrained model)
+
 ```
 
 ## Requirements
@@ -54,34 +93,24 @@ If you find some problems in running, please check the environment file in detai
 ## Prepare the data
 
 The original MELD dataset is offered [here](https://affective-meld.github.io/). You can download it from the website.
+Or you could use the extracted features in the corresponding files in this project.
 
 ## Run
 
-### Quick start
-Our code is built on [transformers](https://github.com/huggingface/transformers) and we use its `3.4.0` version. Other versions of `transformers` might cause unexpected errors.
+You can run the code with the following example:
 
-Before running any experiments, create the result folder by `mkdir result` to save checkpoints. Then you can run our code with the following example:
+'''
+cd ./prompt
+#Training and Validation
+sh meld_val.sh
+#When testing, you should set the checkpoint file name when running the test file
+sh meld_test.sh $checkpointfile_name
 
-```bash
-python run.py \
-    --task_name SST-2 \
-    --data_dir data/k-shot/SST-2/16-42 \
-    --overwrite_output_dir \
-    --do_train \
-    --do_eval \
-    --do_predict \
-    --evaluate_during_training \
-    --model_name_or_path roberta-large \
-    --few_shot_type prompt-demo \
-    --num_k 16 \
-    --max_steps 1000 \
-    --eval_steps 100 \
-    --per_device_train_batch_size 2 \
-    --learning_rate 1e-5 \
-    --num_train_epochs 0 \
-    --output_dir result/tmp \
-    --seed 42 \
-    --template "*cls**sent_0*_It_was*mask*.*sep+*" \
-    --mapping "{'0':'terrible','1':'great'}" \
-    --num_sample 16 \
-```
+'''
+
+If you want the baseline result, run the code:
+
+'''
+cd ./baseline
+sh baseline_concat.sh
+'''
